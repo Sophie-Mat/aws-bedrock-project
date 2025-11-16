@@ -11,7 +11,7 @@ st.title("Bedrock Chat Application")
 # Sidebar for configurations
 st.sidebar.header("Configuration")
 model_id = st.sidebar.selectbox("Select LLM Model", ["anthropic.claude-3-haiku-20240307-v1:0", "anthropic.claude-3-5-sonnet-20240620-v1:0"])
-kb_id = st.sidebar.text_input("Knowledge Base ID", "your-knowledge-base-id")
+kb_id = st.sidebar.text_input("Knowledge Base ID", "AV2ZI5BXN0")
 temperature = st.sidebar.select_slider("Temperature", [i/10 for i in range(0,11)],1)
 top_p = st.sidebar.select_slider("Top_P", [i/1000 for i in range(0,1001)], 1)
 
@@ -35,11 +35,18 @@ if prompt := st.chat_input("What would you like to know?"):
         kb_results = query_knowledge_base(prompt, kb_id)
         
         # Prepare context from Knowledge Base results
-        context = "\n".join([result['content']['text'] for result in kb_results])
-        
-        # Generate response using LLM
-        full_prompt = f"Context: {context}\n\nUser: {prompt}\n\n"
-        response = generate_response(full_prompt, model_id, temperature, top_p)
+        if kb_results:
+            context_parts = []
+            for i, result in enumerate(kb_results, 1):
+                context_parts.append(f"Source {i} (Confidence: {result['score']:.2f}):\n{result['content']}")
+            context = "\n\n".join(context_parts)
+            
+            # Generate response using LLM with context
+            full_prompt = f"Context from heavy machinery documentation:\n\n{context}\n\nUser Question: {prompt}"
+            response = generate_response(full_prompt, model_id, temperature, top_p)
+        else:
+            # No relevant context found
+            response = "I couldn't find specific information about that in our heavy machinery documentation. Could you try rephrasing your question or ask about a different aspect of heavy machinery?"
     else:
         response = "I'm unable to answer this, please try again"
     

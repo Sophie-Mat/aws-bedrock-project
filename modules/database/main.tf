@@ -1,5 +1,9 @@
+resource "random_id" "suffix" {
+  byte_length = 4
+}
+
 resource "aws_rds_cluster" "aurora_serverless" {
-  cluster_identifier      = var.cluster_identifier
+  cluster_identifier      = "${var.cluster_identifier}-${random_id.suffix.hex}"
   engine                  = "aurora-postgresql"
   engine_mode             = "provisioned"
   engine_version          = var.engine_version
@@ -29,11 +33,11 @@ resource "aws_rds_cluster_instance" "aurora_instance" {
 }
 
 resource "aws_db_subnet_group" "aurora" {
-  name       = "${var.cluster_identifier}-subnet-group"
+  name       = "${var.cluster_identifier}-subnet-group-${random_id.suffix.hex}"
   subnet_ids = var.subnet_ids
 
   tags = {
-    Name = "${var.cluster_identifier}-subnet-group"
+    Name = "${var.cluster_identifier}-subnet-group-${random_id.suffix.hex}"
   }
 }
 
@@ -68,7 +72,7 @@ resource "random_password" "master_password" {
 }
 
 resource "aws_secretsmanager_secret" "aurora_secret" {
-  name = "${var.cluster_identifier}"
+  name = "${var.cluster_identifier}-${random_id.suffix.hex}"
   recovery_window_in_days = 0
 }
 

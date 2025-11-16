@@ -113,4 +113,4 @@ def generate_response(prompt, model_id, temperature, top_p):
         return json.loads(response['body'].read())['content'][0]["text"]
     except ClientError as e:
         print(f"Error generating response: {e}")
-        return ""
+        return "I apologize, but I'm having trouble generating a response right now. Please try again."
